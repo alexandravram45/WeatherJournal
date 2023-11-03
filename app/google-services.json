@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "502274674911",
+    "project_id": "weather-journal2",
+    "storage_bucket": "weather-journal2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502274674911:android:f6f0f810ec22474a6e596a",
+        "android_client_info": {
+          "package_name": "com.example.weatherjournal2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE8nCiqA7-vLDK2g0-KQDd7aubDK0D9aA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
