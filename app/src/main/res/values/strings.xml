@@ -3,4 +3,10 @@
     <string name="title_home">Home</string>
     <string name="title_post">Post</string>
     <string name="title_profile">Profile</string>
+    <string name="time">time</string>
+    <string name="_20">20</string>
+    <string name="city_name">City Name</string>
+    <string name="enter_city_name">Enter city name</string>
+    <string name="condition">Condition</string>
+    <string name="today_s_forecast">Today\'s forecast</string>
 </resources>
