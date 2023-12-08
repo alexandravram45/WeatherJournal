@@ -2,20 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/profile"
     android:orientation="vertical"
     android:gravity="center">
 
         <ImageView
             android:id="@+id/userImage"
             android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:src="@drawable/profile" />
+            android:layout_height="150dp"/>
+
+        <Button
+            android:id="@+id/idBAddProfileImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:textSize="15sp"
+            android:layout_marginLeft="50sp"
+            android:layout_marginTop="-40sp"
+            android:background="@drawable/rounded_corners"
+            android:text="@string/plus" />
+
         <TextView
             android:id="@+id/userName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Name"
             android:gravity="center"
             android:layout_marginTop="20sp"
             android:textStyle="bold" />
@@ -23,7 +31,6 @@
             android:id="@+id/userEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Email"
             android:gravity="center"
             android:layout_marginTop="20sp"
             android:textStyle="bold" />
@@ -32,6 +39,6 @@
             android:layout_width="100sp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20sp"
-            android:text="Logout" />
+            android:text="@string/logout" />
 
 </LinearLayout>

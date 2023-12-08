@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.NoConnectionError;
@@ -29,15 +31,22 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.weatherjournal2.MainActivity;
 import com.example.weatherjournal2.R;
 import com.example.weatherjournal2.WeatherRVAdapter;
 import com.example.weatherjournal2.WeatherRVModal;
 import com.example.weatherjournal2.databinding.FragmentHomeBinding;
+import com.example.weatherjournal2.ui.Models.Post;
+import com.example.weatherjournal2.ui.Models.Weather;
+import com.example.weatherjournal2.ui.Models.WeatherManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -63,6 +72,8 @@ public class HomeFragment extends Fragment {
     private FusedLocationProviderClient fusedLocationClient;
     private String cityName;
     private ProgressBar loadingPB;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    Weather currentWeather = new Weather();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -102,10 +113,14 @@ public class HomeFragment extends Fragment {
                         if (cityName.equals("Timișoara")) {
                             cityName = "Timisoara";
                         }
+                        currentWeather.setLongitude(longitude);
+                        currentWeather.setLatitude(latitude);
+                        currentWeather.setCityName(cityName);
                         Log.d("Latitude", String.valueOf(latitude));
                         Log.d("Longitude", String.valueOf(longitude));
                         Log.d("city", String.valueOf(getCityName(longitude, latitude)));
                         getWeatherInfo(cityName);
+                        WeatherManager.getInstance().setCurrentWeather(currentWeather);
                     }
                 }
             });
@@ -171,11 +186,13 @@ public class HomeFragment extends Fragment {
                 try {
                     String temperature = response.getJSONObject("current").getString("temp_c");
                     Log.d("temp: ", temperature);
+                    currentWeather.setTemperature(temperature);
                     temperatureTV.setText(temperature + "°C");
                     int isDay = response.getJSONObject("current").getInt("is_day");
                     String conditionIcon = response.getJSONObject("current").getJSONObject("condition").getString("icon");
                     String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
                     Picasso.get().load("http:".concat(conditionIcon)).into(iconIV);
+                    currentWeather.setConditionIconString(conditionIcon);
                     conditionTV.setText(condition);
                     if (isDay == 1) {
                         Picasso.get().load("https://images.unsplash.com/photo-1617150119111-09bbb85178b0?auto=format&fit=crop&q=80&w=1887&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D").into(backIV);

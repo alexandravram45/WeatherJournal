@@ -9,4 +9,10 @@
     <string name="enter_city_name">Enter city name</string>
     <string name="condition">Condition</string>
     <string name="today_s_forecast">Today\'s forecast</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="logout">Logout</string>
+    <string name="plus">+</string>
 </resources>
