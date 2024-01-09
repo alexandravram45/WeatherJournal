@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,7 +22,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.NoConnectionError;
@@ -31,7 +31,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.weatherjournal2.MainActivity;
 import com.example.weatherjournal2.R;
 import com.example.weatherjournal2.WeatherRVAdapter;
 import com.example.weatherjournal2.WeatherRVModal;
@@ -45,8 +44,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -54,16 +56,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private ImageButton searchButton;
     private RelativeLayout homeRL;
-    private TextView cityNameTV, temperatureTV, conditionTV;
+    private LinearLayout postsLayout;
+    private TextView cityNameTV, temperatureTV, conditionTV, whatsNew;
     private RecyclerView weatherRV;
     private TextInputEditText cityEdt;
     private ImageView backIV, iconIV, searchIV;
@@ -72,8 +80,8 @@ public class HomeFragment extends Fragment {
     private FusedLocationProviderClient fusedLocationClient;
     private String cityName;
     private ProgressBar loadingPB;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
     Weather currentWeather = new Weather();
+    Weather searchedWeather = new Weather();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -90,6 +98,8 @@ public class HomeFragment extends Fragment {
         searchIV = root.findViewById(R.id.idIVSearch);
         iconIV = root.findViewById(R.id.idIVIcon);
         loadingPB = root.findViewById(R.id.idPBLoading);
+        postsLayout = root.findViewById(R.id.postsLayout);
+        whatsNew = root.findViewById(R.id.idTVWhatsNewIn);
 
         weatherRVModalArrayList = new ArrayList<>();
         weatherRVAdapter = new WeatherRVAdapter(getContext(), weatherRVModalArrayList);
@@ -110,9 +120,7 @@ public class HomeFragment extends Fragment {
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
                         cityName = getCityName(longitude, latitude);
-                        if (cityName.equals("Timișoara")) {
-                            cityName = "Timisoara";
-                        }
+                        whatsNew.setText("What's new in " + cityName + "?");
                         currentWeather.setLongitude(longitude);
                         currentWeather.setLatitude(latitude);
                         currentWeather.setCityName(cityName);
@@ -121,6 +129,7 @@ public class HomeFragment extends Fragment {
                         Log.d("city", String.valueOf(getCityName(longitude, latitude)));
                         getWeatherInfo(cityName);
                         WeatherManager.getInstance().setCurrentWeather(currentWeather);
+                        fetchPosts(cityName);
                     }
                 }
             });
@@ -130,14 +139,11 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String city = cityEdt.getText().toString();
-                if (city.equals("Timișoara")) {
-                    city = "Timisoara";
-                }
                 if (city.isEmpty()) {
                     Toast.makeText(getContext(), "Please enter a city name", Toast.LENGTH_SHORT).show();
                 } else {
-                    cityNameTV.setText(cityName);
                     getWeatherInfo(city);
+                    fetchPosts(city);
                 }
             }
         });
@@ -172,9 +178,20 @@ public class HomeFragment extends Fragment {
         return cityName;
     }
 
+    public static String removeDiacritics(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+
     private void getWeatherInfo(String cityName) {
+
+        cityName = removeDiacritics(cityName);
         String url = "http://api.weatherapi.com/v1/forecast.json?key=2897fb1a2e364ceebd3155906230411&q=" + cityName + "&days=1&aqi=no&alerts=no";
-        cityNameTV.setText(cityName);
+
         RequestQueue requestQueue = Volley.newRequestQueue(requireContext());
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -185,13 +202,15 @@ public class HomeFragment extends Fragment {
                 weatherRVModalArrayList.clear();
                 try {
                     String temperature = response.getJSONObject("current").getString("temp_c");
-                    Log.d("temp: ", temperature);
+                    String name = response.getJSONObject("location").getString("name");
+                    String region = response.getJSONObject("location").getString("region");
+                    cityNameTV.setText(name + ", " + region);
                     currentWeather.setTemperature(temperature);
                     temperatureTV.setText(temperature + "°C");
                     int isDay = response.getJSONObject("current").getInt("is_day");
                     String conditionIcon = response.getJSONObject("current").getJSONObject("condition").getString("icon");
                     String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
-                    Picasso.get().load("http:".concat(conditionIcon)).into(iconIV);
+                    Picasso.get().load("http:".concat(conditionIcon)).resize(200,200).into(iconIV);
                     currentWeather.setConditionIconString(conditionIcon);
                     conditionTV.setText(condition);
                     if (isDay == 1) {
@@ -230,6 +249,105 @@ public class HomeFragment extends Fragment {
         });
         requestQueue.add(jsonObjectRequest);
     }
+
+    public void fetchPosts(String city){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference postsRef = db.collection("posts");
+        city = removeDiacritics(city);
+        String finalCity = city;
+        postsRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List<Post> postsList = new ArrayList<>();
+
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
+                    Post post = documentSnapshot.toObject(Post.class);
+                    GeoPoint location = post.getLocation();
+                    String postCity = getCityName(location.getLongitude(), location.getLatitude());
+                    if (postCity.equals("Timișoara")){
+                        postCity = "Timisoara";
+                    }
+                    if (postCity.equals(finalCity)){
+                        postsList.add(post);
+                    }
+                }
+                if (postsList.isEmpty()){
+                    whatsNew.setText("What's new in " + finalCity + "? Nothing now.");
+                    postsLayout.removeAllViews();
+                    return;
+                }
+                whatsNew.setText("What's new in " + finalCity + "?");
+
+                Collections.sort(postsList);
+
+                for (Post post : postsList) {
+                    View postView = LayoutInflater.from(requireContext()).inflate(R.layout.post, null);
+                    ProgressBar progressBar = postView.findViewById(R.id.idProgressBar);
+                    progressBar.setVisibility(View.VISIBLE);
+
+                    ImageView userPhotoImageView = postView.findViewById(R.id.idIVUserPhoto);
+                    String userPhoto = post.getUserPhoto();
+                    Picasso.get()
+                            .load(userPhoto)
+                            .transform(new CropCircleTransformation())
+                            .into(userPhotoImageView);
+
+                    progressBar.setVisibility(View.GONE);
+
+                    TextView usernameTextView = postView.findViewById(R.id.idTVUsername);
+                    String username = post.getUsername();
+                    usernameTextView.setText(username);
+
+                    TextView descriptionTextView = postView.findViewById(R.id.idTVDescription);
+                    String description = post.getPostDescription();
+                    descriptionTextView.setText(description);
+
+                    ImageView postImageView = postView.findViewById(R.id.idIVPostPhoto);
+                    String postImageUri = post.getPostImageUri();
+                    Picasso.get().load(postImageUri).into(postImageView);
+
+                    TextView timeAgoTextView = postView.findViewById(R.id.idTVTimeAgo);
+                    String timeAgo = calculateTimeAgo(post.getTimeStampDate());
+                    timeAgoTextView.setText(timeAgo);
+                    Log.d("timeAgo", timeAgo);
+                    Log.d("timestamp", post.getTimeStampDate().toString());
+
+                    postsLayout.addView(postView);
+                }
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                //
+            }
+        });
+    }
+
+    private String calculateTimeAgo(Date timestampDate) {
+        if (timestampDate != null) {
+            long currentTime = System.currentTimeMillis();
+            long postTime = timestampDate.getTime();
+            long timeDifference = currentTime - postTime;
+
+            long hours = timeDifference / (60 * 60 * 1000);
+            long days = hours / 24;
+
+            if (timeDifference < 60000) { // Less than 1 minute
+                return "Just now";
+            } else if (timeDifference < 3600000) { // Less than 1 hour
+                long minutesAgo = timeDifference / 60000;
+                return minutesAgo + (minutesAgo == 1 ? " minute ago" : " minutes ago");
+            } else if (hours > 0 && hours < 24) {
+                return hours + ("h ago");
+            } else if (days > 0) {
+                return days + ("d ago");
+            }
+        }
+
+        return "";
+    }
+
 
     @Override
     public void onDestroyView() {

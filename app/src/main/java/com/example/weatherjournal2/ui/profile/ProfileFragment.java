@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.weatherjournal2.MainActivity;
@@ -125,11 +126,19 @@ public class ProfileFragment extends Fragment {
 
                     if (TextUtils.isEmpty(email)){
                         Toast.makeText(getContext(), "Enter email", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                        emailEditText.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
+
                         return;
+
                     }
                     if (TextUtils.isEmpty(password)){
+                        progressBar.setVisibility(View.GONE);
                         Toast.makeText(getContext(), "Enter password", Toast.LENGTH_SHORT).show();
+                        passwordEditText.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
+
                         return;
+
                     }
 
                     mAuth.signInWithEmailAndPassword(email, password)
@@ -151,6 +160,8 @@ public class ProfileFragment extends Fragment {
                                         } catch(FirebaseAuthInvalidCredentialsException e) {
                                             Toast.makeText(getContext(), "Invalid credentials.",
                                                     Toast.LENGTH_SHORT).show();
+                                            emailEditText.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
+                                            passwordEditText.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
                                         } catch (Exception e) {
                                             Log.d("Firebase login error", e.getMessage());
                                             Toast.makeText(getContext(), "Authentication error. Make sure the credentials are right.",
@@ -186,10 +197,15 @@ public class ProfileFragment extends Fragment {
 
                             if (TextUtils.isEmpty(email)) {
                                 Toast.makeText(getContext(), "Enter email", Toast.LENGTH_SHORT).show();
+                                progressBarReg.setVisibility(View.GONE);
+                                emailEditTextReg.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
+
                                 return;
                             }
                             if (TextUtils.isEmpty(password)) {
                                 Toast.makeText(getContext(), "Enter password", Toast.LENGTH_SHORT).show();
+                                progressBarReg.setVisibility(View.GONE);
+                                passwordEditTextReg.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
                                 return;
                             }
 
@@ -228,14 +244,22 @@ public class ProfileFragment extends Fragment {
                                                 } catch (FirebaseAuthWeakPasswordException e) {
                                                     Toast.makeText(getContext(), "Weak password!",
                                                             Toast.LENGTH_SHORT).show();
+                                                    passwordEditTextReg.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
+                                                    progressBarReg.setVisibility(View.GONE);
                                                 } catch (FirebaseAuthInvalidCredentialsException e) {
-                                                    Toast.makeText(getContext(), "Invalid credentials.",
+                                                    Toast.makeText(getContext(), "Invalid credentials format.",
                                                             Toast.LENGTH_SHORT).show();
-                                                } catch (FirebaseAuthException e) {
-                                                    Toast.makeText(getContext(), "Authentication failed.",
-                                                            Toast.LENGTH_SHORT).show();
+                                                    progressBarReg.setVisibility(View.GONE);
+                                                    } catch (FirebaseAuthException e) {
+                                                        if (e.getErrorCode().equals("ERROR_EMAIL_ALREADY_IN_USE")){
+                                                            Toast.makeText(getContext(), "Email already in use.",
+                                                                    Toast.LENGTH_SHORT).show();
+                                                            emailEditTextReg.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red));
+                                                            progressBarReg.setVisibility(View.GONE);
+                                                        }
                                                 } catch (Exception e) {
                                                     Log.d("Firebase exception", Objects.requireNonNull(e.getMessage()));
+
                                                 }
                                             }
                                         }
@@ -266,9 +290,7 @@ public class ProfileFragment extends Fragment {
 
             imageRef.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> {
-                        // Image uploaded successfully, get the download URL
                         imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                            // Use Picasso to load and display the image
                             Picasso.get()
                                     .load(uri)
                                     .fit()

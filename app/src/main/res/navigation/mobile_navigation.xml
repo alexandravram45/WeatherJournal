@@ -14,7 +14,7 @@
     <fragment
         android:id="@+id/navigation_new_post"
         android:name="com.example.weatherjournal2.ui.newPost.NewPostFragment"
-        android:label="@string/title_post"
+        android:label="New post"
         tools:layout="@layout/fragment_new_post" />
 
     <fragment

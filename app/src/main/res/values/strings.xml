@@ -15,4 +15,10 @@
     <string name="don_t_have_an_account">Don\'t have an account?</string>
     <string name="logout">Logout</string>
     <string name="plus">+</string>
+    <string name="log_in">Log In</string>
+    <string name="password">password</string>
+    <string name="email">email</string>
+    <string name="new_post">New post</string>
+    <string name="location_icon">Location Icon</string>
+    <string name="location">Location</string>
 </resources>

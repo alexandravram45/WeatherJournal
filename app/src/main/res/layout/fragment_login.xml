@@ -6,6 +6,12 @@
     android:gravity="center"
     android:padding="20dp">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/cloudy" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="52dp"
@@ -22,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/emailEditText"
-                android:hint="email" />
+                android:hint="@string/email" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -35,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/passwordEditText"
                 android:inputType="textPassword"
-                android:hint="password" />
+                android:hint="@string/password" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -51,8 +57,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Log In" />
-
+            android:background="@drawable/button_background"
+            android:text="@string/log_in" />
 
         <TextView
             android:layout_width="match_parent"
