@@ -10,9 +10,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New post"
+        android:text="@string/new_post"
         android:textSize="20sp"
-        android:gravity="start"
         android:padding="16dp"/>
 
     <LinearLayout
@@ -21,20 +20,19 @@
         android:orientation="horizontal"
         android:gravity="center_horizontal">
 
-        <!-- Icon for postLocation -->
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/baseline_pin_drop_24"
-        android:contentDescription="Location Icon"/>
+        android:contentDescription="@string/location_icon"/>
 
         <TextView
             android:id="@+id/postLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Location"
+            android:text="@string/location"
             android:layout_marginLeft="10dp"
-            android:textSize="14sp"/>
+            android:textSize="20sp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -44,11 +42,10 @@
         android:gravity="center_horizontal"
         android:layout_marginBottom="15dp">
 
-        <!-- Icon for postTemperature -->
         <ImageView
             android:id="@+id/conditionIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
         android:contentDescription="Temperature Icon"/>
 
         <TextView
@@ -57,7 +54,7 @@
             android:layout_height="wrap_content"
             android:text=" °C"
             android:layout_marginLeft="10dp"
-            android:textSize="14sp"/>
+            android:textSize="20sp"/>
     </LinearLayout>
 
     <FrameLayout
@@ -73,8 +70,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY" />
-
-        <!-- You can add additional views or widgets on top of the ImageView if needed -->
     </FrameLayout>
 
     <EditText
@@ -89,22 +84,22 @@
         android:gravity="start"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginLeft="70sp"
+        android:layout_gravity="center"
         android:gravity="center_horizontal">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
 
             <Button
                 android:id="@+id/chooseFromGallery"
-                android:layout_width="wrap_content"
-                android:layout_height="80dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_margin="16dp"
                 android:background="@drawable/baseline_insert_photo_24"
                 android:gravity="center"
@@ -119,15 +114,15 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
 
             <Button
                 android:id="@+id/takeAPhoto"
-                android:layout_width="wrap_content"
-                android:layout_height="82dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_margin="16dp"
                 android:background="@drawable/baseline_photo_camera_24"
                 android:gravity="center"
@@ -142,12 +137,20 @@
         </LinearLayout>
     </LinearLayout>
 
-
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20sp"
+        android:visibility="gone"
+        />
     <Button
         android:id="@+id/postButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
+        android:background="@drawable/button_background"
         android:layout_marginHorizontal="20sp"
         android:layout_marginTop="20sp"
         android:text="POST"
